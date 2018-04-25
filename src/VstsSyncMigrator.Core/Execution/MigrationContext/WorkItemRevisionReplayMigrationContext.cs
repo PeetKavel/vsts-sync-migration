@@ -317,7 +317,15 @@ namespace VstsSyncMigrator.Engine
         public bool NodeExists(string nodePath, WorkItemStore store)
         {
             ICommonStructureService commonStructure = (ICommonStructureService4)store.TeamProjectCollection.GetService(typeof(ICommonStructureService4));
-            NodeInfo node = commonStructure.GetNodeFromPath(nodePath);
+            NodeInfo node = null;
+            try
+            {
+                node = commonStructure.GetNodeFromPath(nodePath);
+            }
+            catch
+            {
+
+            }        
             return (node != null);
         }
     }
