@@ -5,7 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-
+using Microsoft.TeamFoundation.Server;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
 
 using VstsSyncMigrator.Engine.Configuration.Processing;
@@ -263,8 +263,22 @@ namespace VstsSyncMigrator.Engine
             else
             {
                 var regex = new Regex(Regex.Escape(oldWi.Project.Name));
-                newwit.AreaPath = regex.Replace(oldWi.AreaPath, newwit.Project.Name, 1);
-                newwit.IterationPath = regex.Replace(oldWi.IterationPath, newwit.Project.Name, 1);
+                string newAreaPath = regex.Replace(oldWi.AreaPath, newwit.Project.Name, 1);
+                if (NodeExists(newAreaPath, newwit.Store))
+                {
+                    newwit.AreaPath = newAreaPath;
+                } else
+                {
+                    Trace.WriteLine(string.Format("The Area Path {0} does not exist, leaving as {1}. This may be because it has been renamed or moved and no longer exists, or that you have not migrateed the Node Structure yet.", newAreaPath, newwit.AreaPath));
+                }
+                string newIterationPath = regex.Replace(oldWi.IterationPath, newwit.Project.Name, 1);
+                if (NodeExists(newIterationPath, newwit.Store))
+                {
+                    newwit.IterationPath = newIterationPath;
+                } else
+                {
+                    Trace.WriteLine(string.Format("The Area Path {0} does not exist, leaving as {1}. This may be because it has been renamed or moved and no longer exists, or that you have not migrateed the Node Structure yet.", newIterationPath, newwit.IterationPath));
+                }            
             }
 
             switch (destType)
@@ -298,6 +312,13 @@ namespace VstsSyncMigrator.Engine
             double result;
             return double.TryParse(val, numberStyle,
                 CultureInfo.CurrentCulture, out result);
+        }
+
+        public bool NodeExists(string nodePath, WorkItemStore store)
+        {
+            ICommonStructureService commonStructure = (ICommonStructureService4)store.TeamProjectCollection.GetService(typeof(ICommonStructureService4));
+            NodeInfo node = commonStructure.GetNodeFromPath(nodePath);
+            return (node != null);
         }
     }
 }
