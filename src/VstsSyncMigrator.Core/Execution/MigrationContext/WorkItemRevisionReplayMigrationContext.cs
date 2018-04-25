@@ -255,48 +255,8 @@ namespace VstsSyncMigrator.Engine
                 }
             }
 
-            if (_config.PrefixProjectToNodes)
-            {
-                string newAreaPath = $@"{newwit.Project.Name}\{oldWi.AreaPath}";
-                if (NodeExists(newAreaPath, newwit.Store))
-                {
-                    newwit.AreaPath = newAreaPath;
-                } else
-                {
-                    newwit.AreaPath = newwit.Project.Name;
-                }
-                string newIterationPath = $@"{newwit.Project.Name}\{oldWi.IterationPath}";
-                if (NodeExists(newIterationPath, newwit.Store))
-                {
-                    newwit.IterationPath = newIterationPath;
-                } else
-                {
-                    newwit.IterationPath = newwit.Project.Name;
-                }
-                    
-            }
-            else
-            {
-                var regex = new Regex(Regex.Escape(oldWi.Project.Name));
-                string newAreaPath = regex.Replace(oldWi.AreaPath, newwit.Project.Name, 1);
-                if (NodeExists(newAreaPath, newwit.Store))
-                {
-                    newwit.AreaPath = newAreaPath;
-                } else
-                {
-                    newwit.AreaPath = newwit.Project.Name;
-                    Trace.WriteLine(string.Format("The Area Path {0} does not exist, leaving as {1}. This may be because it has been renamed or moved and no longer exists, or that you have not migrateed the Node Structure yet.", newAreaPath, newwit.AreaPath));
-                }
-                string newIterationPath = regex.Replace(oldWi.IterationPath, newwit.Project.Name, 1);
-                if (NodeExists(newIterationPath, newwit.Store))
-                {
-                    newwit.IterationPath = newIterationPath;
-                } else
-                {
-                    newwit.IterationPath = newwit.Project.Name;
-                    Trace.WriteLine(string.Format("The Area Path {0} does not exist, leaving as {1}. This may be because it has been renamed or moved and no longer exists, or that you have not migrateed the Node Structure yet.", newIterationPath, newwit.IterationPath));
-                }            
-            }
+            newwit.AreaPath = GetNewNodeName(oldWi.AreaPath, oldWi.Project.Name, newwit.Project.Name, newwit.Store);
+            newwit.IterationPath = GetNewNodeName(oldWi.IterationPath, oldWi.Project.Name, newwit.Project.Name, newwit.Store);
 
             switch (destType)
             {
@@ -323,6 +283,27 @@ namespace VstsSyncMigrator.Engine
             Trace.WriteLine(
                 $"FieldMapOnNewWorkItem: {newWorkItemstartTime} - {fieldMappingTimer.Elapsed.ToString("c")}", Name);
         }
+
+        private string GetNewNodeName(string oldNodeName, string oldProjectName, string newProjectName, WorkItemStore store)
+        {
+            string newNodeName = "";
+            if (_config.PrefixProjectToNodes)
+            {
+                newNodeName = $@"{newProjectName}\{oldNodeName}";
+            } else
+            {
+                var regex = new Regex(Regex.Escape(oldProjectName));
+                newNodeName = regex.Replace(oldNodeName, newProjectName, 1);
+            }
+
+            if (!NodeExists(newNodeName, store))
+            {
+                Trace.WriteLine(string.Format("The Area Path '{0}' does not exist, leaving as '{1}'. This may be because it has been renamed or moved and no longer exists, or that you have not migrateed the Node Structure yet.", newNodeName, newProjectName));
+                newNodeName = newProjectName;
+            }
+            return newNodeName;
+        }
+
         
         private static bool IsNumeric(string val, NumberStyles numberStyle)
         {
