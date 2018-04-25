@@ -284,7 +284,7 @@ namespace VstsSyncMigrator.Engine
                 $"FieldMapOnNewWorkItem: {newWorkItemstartTime} - {fieldMappingTimer.Elapsed.ToString("c")}", Name);
         }
 
-        private string GetNewNodeName(string oldNodeName, string oldProjectName, string newProjectName, WorkItemStore store)
+        private string GetNewNodeName(string oldNodeName, string oldProjectName, string newProjectName, WorkItemStore newStore)
         {
             string newNodeName = "";
             if (_config.PrefixProjectToNodes)
@@ -296,7 +296,7 @@ namespace VstsSyncMigrator.Engine
                 newNodeName = regex.Replace(oldNodeName, newProjectName, 1);
             }
 
-            if (!NodeExists(newNodeName, store))
+            if (!NodeExists(newNodeName, newStore))
             {
                 Trace.WriteLine(string.Format("The Node '{0}' does not exist, leaving as '{1}'. This may be because it has been renamed or moved and no longer exists, or that you have not migrateed the Node Structure yet.", newNodeName, newProjectName));
                 newNodeName = newProjectName;
@@ -322,9 +322,9 @@ namespace VstsSyncMigrator.Engine
             }
             catch
             {
-
-            }        
-            return (node != null);
+                return false;
+            }
+            return true;
         }
     }
 }
