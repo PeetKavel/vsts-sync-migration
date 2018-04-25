@@ -257,8 +257,23 @@ namespace VstsSyncMigrator.Engine
 
             if (_config.PrefixProjectToNodes)
             {
-                newwit.AreaPath = $@"{newwit.Project.Name}\{oldWi.AreaPath}";
-                newwit.IterationPath = $@"{newwit.Project.Name}\{oldWi.IterationPath}";
+                string newAreaPath = $@"{newwit.Project.Name}\{oldWi.AreaPath}";
+                if (NodeExists(newAreaPath, newwit.Store))
+                {
+                    newwit.AreaPath = newAreaPath;
+                } else
+                {
+                    newwit.AreaPath = newwit.Project.Name;
+                }
+                string newIterationPath = $@"{newwit.Project.Name}\{oldWi.IterationPath}";
+                if (NodeExists(newIterationPath, newwit.Store))
+                {
+                    newwit.IterationPath = newIterationPath;
+                } else
+                {
+                    newwit.IterationPath = newwit.Project.Name;
+                }
+                    
             }
             else
             {
@@ -269,6 +284,7 @@ namespace VstsSyncMigrator.Engine
                     newwit.AreaPath = newAreaPath;
                 } else
                 {
+                    newwit.AreaPath = newwit.Project.Name;
                     Trace.WriteLine(string.Format("The Area Path {0} does not exist, leaving as {1}. This may be because it has been renamed or moved and no longer exists, or that you have not migrateed the Node Structure yet.", newAreaPath, newwit.AreaPath));
                 }
                 string newIterationPath = regex.Replace(oldWi.IterationPath, newwit.Project.Name, 1);
@@ -277,6 +293,7 @@ namespace VstsSyncMigrator.Engine
                     newwit.IterationPath = newIterationPath;
                 } else
                 {
+                    newwit.IterationPath = newwit.Project.Name;
                     Trace.WriteLine(string.Format("The Area Path {0} does not exist, leaving as {1}. This may be because it has been renamed or moved and no longer exists, or that you have not migrateed the Node Structure yet.", newIterationPath, newwit.IterationPath));
                 }            
             }
