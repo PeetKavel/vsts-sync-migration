@@ -298,7 +298,7 @@ namespace VstsSyncMigrator.Engine
 
             if (!NodeExists(newNodeName, store))
             {
-                Trace.WriteLine(string.Format("The Area Path '{0}' does not exist, leaving as '{1}'. This may be because it has been renamed or moved and no longer exists, or that you have not migrateed the Node Structure yet.", newNodeName, newProjectName));
+                Trace.WriteLine(string.Format("The Node '{0}' does not exist, leaving as '{1}'. This may be because it has been renamed or moved and no longer exists, or that you have not migrateed the Node Structure yet.", newNodeName, newProjectName));
                 newNodeName = newProjectName;
             }
             return newNodeName;
